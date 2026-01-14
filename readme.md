@@ -4,9 +4,9 @@
 
 Created by GTAMP but 99% of the code is from brijohns's Coleco Loader.
 
-it's only compatible with rev B 0x240d
+It's entry address is 0x240d, so it's only compatible with NABU rev B rom
 
-not everything works, probably my bug but also could be differences between NABU rom state and this loader state
+Not everything works, some are my bugs but also could be differences between NABU rom state and this loader state
 
 Video of it working in MAME:
 https://www.youtube.com/watch?v=ybb1Ef9VEq4
