@@ -5,6 +5,7 @@
 Created by GTAMP but 99% of the code is from brijohns's Coleco Loader.
 
 loader.nabu entry point is 0x240d, so it's only compatible with NABU rev B rom
+
 loader.com entry point is 0x100, so it's only compatible with NABU CP/M
 
 Not everything works, some are my bugs but also could be differences between NABU rom state and this loader state
