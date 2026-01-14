@@ -1,0 +1,111 @@
+; NABU PC 0x140D loader for Henry's rev B
+;
+; Copyright (c) 2026 GTAMP & Brian Johnson.  All rights reserved.
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions
+; are met:
+; 1. Redistributions of source code must retain the above copyright
+;    notice, this list of conditions and the following disclaimer.
+; 2. Redistributions in binary form must reproduce the above copyright
+;    notice, this list of conditions and the following disclaimer in the
+;    documentation and/or other materials provided with the distribution.
+;
+; THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+; IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+; OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+; IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+; INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+; NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+.section .crt0, "acrx"
+    nop
+    nop
+    nop
+entry:
+    di                                      ; Ensure interrupts are disabled
+    ld sp, 0x0                              ; I don't know where to put this
+
+    ; Relocate code to address 0x7D0
+    ld hl, reloc_end - 1
+    ld de, 0x7D0 + reloc_length - 1
+    ld bc, reloc_length
+    lddr
+
+    jp main                                 ; Jump to relocated main program
+
+.section .text, "acrx"
+main:
+    call install_interrupt_handlers         ; Install default interrupt handlers
+    call init_tms9918                       ; Initialize the VDP
+    ld bc, 0x0000                           ; Row = 0, Column = 8
+    call set_cursor                         ; Set Cursor
+    ld de, banner
+    call print_string                       ; Print banner
+
+    ld bc, 0x0200                           ; Row = 1, Column = 0
+    call set_cursor                         ; Set Cursor
+    ld de, byline
+    call print_string                       ; Print byline
+
+    ld bc, 0x0400                           ; Row = 3, Column = 0
+    call set_cursor                         ; Set Cursor
+    ld de, go_msg
+    call print_string                       ; Print byline
+    
+    WaitKey: 
+    .set KEYBOARD_DATA, 0x90                ; Keyboard data port
+    in a,(KEYBOARD_DATA)
+    cp 0x0d ; enter
+    jr z, enter
+    jr WaitKey
+    enter:
+    
+    ld bc, 0x0600                           ; Row = 4, Column = 0
+    call set_cursor                         ; Set Cursor
+    ld de, pak_msg
+    call print_string                       ; Print loading PAK message
+    
+    ld a, 0xc0                              ; C = INTERRUPT_HCCA_RX | INTERRUPT_HCCA_TX
+    call enable_interrupts                  ; Enable HCCA interrupt generation
+    ld hl, print_dot                        ; HL = print_dot function
+    call set_hcca_status_callback           ; Status callback for hcca pack request
+    ld hl, 0x0001
+    ld de, 0x140D
+    call request_pack                       ; Request pack 1 and load at 0x140D
+    ld bc, 0x0700                           ; Row = 4, Column = 0
+    call set_cursor                         ; Set Cursor
+
+    push af                                 ; Save Flags
+    ld a, 0xc0                              ; C = INTERRUPT_HCCA_RX | INTERRUPT_HCCA_TX
+    call disable_interrupts                 ; Disable HCCA interrupt generation
+    pop af                                  ; Restore Flags
+start_rom:
+    ld a, 0x03
+    out (0x00), a                           ; Disable NABU bios
+    jp 0x1410                               ; Jump to NABU entry
+halt_loop:
+    jp halt_loop                            ; Halt
+
+
+; Callback to print a dot for every segment of a pack
+print_dot:
+    ld a, '.'
+    call print_char                         ; Print '.'
+    ret
+
+.section .data, "adrw"
+
+banner:
+    .byte "NABU 0x140D loader for Henry's rev B", 0
+byline:
+    .byte "By GTAMP using brijohn's PAK loader code", 0
+go_msg:
+    .byte "Switch PAK and press GO", 0
+pak_msg:
+    .byte "Loading", 0
+.byte 0
