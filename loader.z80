@@ -84,14 +84,31 @@ main:
     ld a, 0xc0                              ; C = INTERRUPT_HCCA_RX | INTERRUPT_HCCA_TX
     call disable_interrupts                 ; Disable HCCA interrupt generation
     pop af                                  ; Restore Flags
-start_rom:
+
+cleanup:
     ld a, 0x03
     out (0x00), a                           ; Disable NABU bios
+	
+	ld hl, 0x0000
+    ld (hl), 0
+    ld de, 0x0001
+    ld bc, 0x140c                           ; Clear RAM (0x0000 to 0x140c)
+    ldir
+	
 	call init_special                       ; Temp hack for sc0plasma
-    jp 0x1410                               ; Jump to NABU entry
+	
+	xor a                                   ; A=0, Carry=0, Zero=1
+    ld b, a
+    ld c, a
+    ld d, a
+    ld e, a
+    ld h, a
+    ld l, a                                 ; Flags are now reset
+   
+	di
+	jp 0x1410                               ; Jump to NABU entry
 halt_loop:
     jp halt_loop                            ; Halt
-
 
 ; Callback to print a dot for every segment of a pack
 print_dot:
@@ -109,4 +126,3 @@ go_msg:
     .byte "Switch PAK and press GO", 0
 pak_msg:
     .byte "Loading", 0
-.byte 0
