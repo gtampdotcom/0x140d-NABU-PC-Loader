@@ -1,7 +1,7 @@
 ENTRY(entry);
 
 SECTIONS {
-	.crt0 0x240d : {
+	.crt0 0x100 : {
 		*(.crt0 .crt0.*)
 	}
 	PROVIDE(reloc_start = .);

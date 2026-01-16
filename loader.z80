@@ -32,7 +32,7 @@ entry:
 
     ; Relocate code to address 0x0
     ld hl, reloc_end - 1
-    ld de, 0x0 + reloc_length - 1
+    ld de, 0xF000 + reloc_length - 1
     ld bc, reloc_length
     lddr
 
@@ -88,25 +88,6 @@ start_rom:
     ld a, 0x03
     out (0x00), a                           ; Disable NABU bios
 	call init_special                       ; Temp hack for sc0plasma
-	clrscr:   push      af
-          push      bc
-          push      de
-clrscr2:  ld        c, 0xA1             ; VDP address register
-          xor       a                   ; Address 0x0800
-          out       (c), a
-          ld        a, 0x48
-          out       (c), a
-          dec       c                   ; VDP data register
-          ld        de, 960             ; DECIMAL
-clrscr3:  ld        a, ' '              ; Intentionally suboptimal
-          out       (c), a
-          dec       de                  ; Tick down
-          ld        a, d
-          or        e
-          jp        nz, clrscr3
-          pop       de
-          pop       bc
-	
     jp 0x1410                               ; Jump to NABU entry
 halt_loop:
     jp halt_loop                            ; Halt
