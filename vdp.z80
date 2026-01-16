@@ -32,6 +32,11 @@
 
 ; Initialize TMS9918 in text mode
 .global init_tms9918
+.global init_special
+init_special:
+	ld hl, vdp_special                    ; Point to the start of the register values
+    ld b, 0                                 ; Start with register 0
+	jr init_loop
 init_tms9918:
     ld hl, vdp_registers                    ; Point to the start of the register values
     ld b, 0                                 ; Start with register 0
@@ -297,7 +302,19 @@ vdp_registers:
     .byte (PATTERN_TABLE >> 11)             ; Register 4: Pattern generator table address divided by 0x800
     .byte 0x00                              ; Register 5: (Not used in text mode)
     .byte 0x00                              ; Register 6: (Not used in text mode)
-    .byte 0xF1                              ; Register 7: Foreground and background colors
+    .byte 0xF5                              ; Register 7: Foreground and background colors
+	
+vdp_special:
+    .byte 0x00                              ; Register 0: Text mode selected
+    .byte 0xD0                              ; Register 1: Text mode, enable display, disable interrupts, use 4116 DRAM
+    .byte 0x02                              ; Register 2: Name table address divided by 0x400
+    .byte 0x00                              ; Register 3: (Not used in text mode)
+    .byte 0x00                              ; Register 4: Pattern generator table address divided by 0x800
+    .byte 0x20                              ; Register 5: (Not used in text mode)
+    .byte 0x00                              ; Register 6: (Not used in text mode)
+    .byte 0xF5                              ; Register 7: Foreground and background colors
+	
+	;0x00, 0xD0, 0x02, 0x00, 0x00, 0x20, 0x00, 0xF5
 
 ; Font data taken from z88dk
 font_table:
