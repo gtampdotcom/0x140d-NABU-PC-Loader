@@ -30,5 +30,6 @@ This will create ```000001.nabu```
 
 # Links
 https://gtamp.com/nabu
+https://gtamp.com/nabu/labomb/
 https://github.com/gtampdotcom
 https://github.com/brijohn/nabupc/tree/master/games/nabu_coleco
