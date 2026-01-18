@@ -30,7 +30,7 @@ entry:
     di                                      ; Ensure interrupts are disabled
     ld sp, 0xFFE0                           ; Stack fills in reverse, put it out of the way
 
-    ; Relocate code to address 0x0
+    ; Relocate code to address 0xF000
     ld hl, reloc_end - 1
     ld de, 0xF000 + reloc_length - 1
     ld bc, reloc_length
